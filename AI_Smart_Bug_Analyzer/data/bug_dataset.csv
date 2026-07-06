@@ -1,0 +1,54 @@
+BugID,Title,Description,Module,Priority,Severity,ProgrammingLanguage,OperatingSystem,StackTrace,ExpectedBehavior,ActualBehavior,FixStatus,SubmittedAt,LogFileName
+BUG-0001,NullPointerException in UserService.getUser(),NullPointerException thrown when userId parameter is null in UserService.getUser() method.,UserService,High,Critical,Java,Linux,"java.lang.NullPointerException
+  at com.app.UserService.getUser(UserService.java:42)
+  at com.app.controllers.UserController.profile(UserController.java:88)",Return empty Optional when userId is null.,Application crashes with HTTP 500.,Open,2024-01-10 09:15:00 UTC,
+BUG-0002,IndexError on CSV parse with missing columns,IndexError raised when input CSV has fewer columns than expected on line 87 of data_processor.py.,DataProcessor,High,High,Python,Windows,"Traceback (most recent call last):
+  File ""data_processor.py"", line 87, in process
+    value = row[5]
+IndexError: list index out of range",Parse file successfully and skip malformed rows.,Script crashes on any CSV with fewer than 6 columns.,Open,2024-01-11 11:30:00 UTC,error_log.txt
+BUG-0003,Memory leak in WebSocket connection handler,Heap memory grows by ~50 MB per hour under moderate load. WebSocket connections not closed properly.,WebSocket,High,High,Python,Linux,"No stack trace. Profiler output:
+  Retained: 512 MB after 10 hours
+  Source: websocket_handler.py:ConnectionPool",Heap usage should remain stable.,Heap grows unbounded until OOM.,Open,2024-01-12 14:00:00 UTC,heap_profile.log
+BUG-0004,SQL injection in login endpoint,User input is concatenated directly into the SQL query string in auth/login.py line 34.,Auth,Critical,Critical,Python,Linux,"No exception. Payload: ' OR 1=1 --
+  Query executed: SELECT * FROM users WHERE username='' OR 1=1 --'",Login should reject invalid credentials.,All authentication is bypassed.,Open,2024-01-13 08:45:00 UTC,
+BUG-0005,Unhandled Promise rejection in fetchUserData,Async function fetchUserData() has no .catch() or try/catch block. Causes silent failures in production.,API Client,Medium,High,JavaScript,macOS,"UnhandledPromiseRejectionWarning: Error: Network request failed
+  at fetchUserData (api/client.js:55)
+  at async loadDashboard (pages/dashboard.js:23)",Data should load with error feedback on failure.,Errors are swallowed silently; UI shows blank panel.,Open,2024-01-14 10:20:00 UTC,
+BUG-0006,Race condition in concurrent file writes,Two threads write to the same output file simultaneously causing data corruption.,FileWriter,High,High,Java,Windows,"java.io.IOException: Broken pipe
+  at FileWriter.write(FileWriter.java:112)
+  at ReportGenerator.run(ReportGenerator.java:67)",File written atomically without corruption.,Last-write-wins corruption; partial data in output.,Open,2024-01-15 16:10:00 UTC,thread_dump.log
+BUG-0007,JWT token missing exp claim,JWT tokens are signed without an expiry claim. Tokens remain valid indefinitely.,Auth,Critical,Critical,Node.js,Linux,"No exception. Token decoded:
+  { ""sub"": ""user_123"", ""iat"": 1705000000 }
+  Missing: exp",Tokens should expire after 1 hour.,Tokens never expire; revocation is impossible.,Open,2024-01-16 09:00:00 UTC,
+BUG-0008,Infinite loop in recursive tree traversal,DFS traversal enters infinite loop when the graph contains a cycle.,GraphEngine,High,High,Python,Linux,"Process killed after CPU at 100% for 60 s
+  Last frame: tree.py:traverse() line 88 (recursive call)",Traversal completes in O(N) time.,CPU pegged at 100%; process must be killed.,Open,2024-01-17 13:45:00 UTC,cpu_trace.log
+BUG-0009,AttributeError on uninitialised config value,Config value DB_HOST read before initialisation returns None. strip() call fails.,Config,Medium,Medium,Python,Windows,"Traceback (most recent call last):
+  File ""db/connection.py"", line 19, in connect
+    host = config.DB_HOST.strip()
+AttributeError: 'NoneType' object has no attribute 'strip'",App reads DB_HOST from environment and connects.,Crash at startup if DB_HOST is not set.,Open,2024-01-18 08:00:00 UTC,
+BUG-0010,Missing CORS headers block frontend API calls,API responses missing Access-Control-Allow-Origin header. Frontend blocked by browser.,API Gateway,Low,Medium,Python,Linux,"No server exception.
+  Browser console: Access to XMLHttpRequest blocked by CORS policy",Frontend receives API responses.,All cross-origin API calls fail in browser.,Open,2024-01-19 15:30:00 UTC,
+BUG-0011,Deadlock in database connection pool,Two threads each hold one lock and wait for the other. Application hangs indefinitely.,Database,Critical,Critical,Java,Linux,"java.lang.Thread.State: WAITING
+  at ConnectionPool.acquire(ConnectionPool.java:78)
+  Deadlock detected: Thread-1 ↔ Thread-2",Queries execute concurrently without hanging.,Application freezes under concurrent load.,Open,2024-01-20 11:00:00 UTC,thread_dump.log
+BUG-0012,Integer overflow in payment amount calculation,32-bit integer used for payment total overflows when amount > $2147483647.,PaymentService,Critical,Critical,Java,Linux,"No exception. Calculated total: -2147483648 (overflow)
+  at PaymentService.calculateTotal(PaymentService.java:56)",Correct total displayed and charged.,Negative amounts charged for large orders.,Open,2024-01-21 09:30:00 UTC,
+BUG-0013,XSS vulnerability in user comment rendering,User-submitted HTML in comments is rendered without sanitisation.,CommentModule,High,High,JavaScript,Linux,"Payload: <script>alert(document.cookie)</script>
+  Executed in victim's browser.",Comments rendered as plain text.,Arbitrary JS executes in any visitor's browser.,Open,2024-01-22 14:15:00 UTC,
+BUG-0014,File path traversal in document download,filename parameter in /download endpoint not sanitised. Allows reading arbitrary server files.,FileService,Critical,Critical,Python,Linux,"GET /download?filename=../../etc/passwd
+  Response: root:x:0:0:root:/root:/bin/bash ...",Only files in /uploads/ can be downloaded.,Any server file readable by the process is exposed.,Open,2024-01-23 10:00:00 UTC,access.log
+BUG-0015,Segmentation fault in C extension on large input,C extension module crashes with SIGSEGV when input array exceeds 1 million elements.,MLPipeline,High,Critical,Python,Linux,"Segmentation fault (core dumped)
+  #0  0x00007f3a4c2d1234 in process_array()
+  #1  0x00007f3a4c2d5678 in PyArg_ParseTuple()",Process arrays of any size without crashing.,Hard crash; no Python exception caught.,Open,2024-01-24 16:00:00 UTC,core_dump.log
+BUG-0016,Hardcoded credentials in database config,Database password hardcoded as plain text in db/config.py committed to Git.,Config,Critical,Critical,Python,macOS,"No exception.
+  config.py line 7: DB_PASSWORD = ""prod_secret_pass123""",Credentials stored in environment variables.,Password exposed in version control history.,Open,2024-01-25 09:00:00 UTC,
+BUG-0017,React component re-renders on every keystroke,Product list component re-renders on every keystroke in search box due to missing dependency array.,Frontend,Low,Low,JavaScript,macOS,"React DevTools Profiler:
+  ProductList rendered 847 times in 10 s
+  Trigger: SearchBox state update",Component renders only when search term changes.,UI becomes sluggish on slow devices.,Open,2024-01-26 11:30:00 UTC,
+BUG-0018,Timezone-naive datetime stored in UTC column,datetime.now() used instead of datetime.utcnow() or datetime.now(utc). Off-by-hours bugs in reports.,Scheduler,Medium,Medium,Python,Linux,"No exception.
+  Stored: 2024-01-26 10:00:00 (local)
+  Expected: 2024-01-26 15:00:00 (UTC)",All timestamps stored in UTC.,Reports show wrong times for non-UTC users.,Open,2024-01-27 08:00:00 UTC,
+BUG-0019,Insecure direct object reference in order API,Order ID accepted directly from URL; no ownership check. Any user can access others' orders.,OrderService,High,High,Node.js,Linux,"GET /api/orders/99999
+  Response: order data for user_456 (requested by user_123)",Only the owning user can view their orders.,Any authenticated user can read any order.,Open,2024-01-28 14:00:00 UTC,
+BUG-0020,Unclosed file handle causes resource exhaustion,open() used without context manager or explicit close(). File handles exhausted under load.,FileProcessor,Medium,High,Python,Linux,"OSError: [Errno 24] Too many open files
+  at FileProcessor.read(file_processor.py:34)",Files opened and closed cleanly.,Process runs out of file descriptors after ~1024 ops.,Open,2024-01-29 10:30:00 UTC,syslog.log
